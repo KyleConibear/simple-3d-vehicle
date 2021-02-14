@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Conibear {
+﻿namespace Conibear {
 	using UnityEngine;
 
 	public class Car : MonoBehaviour {
@@ -31,7 +29,7 @@ namespace Conibear {
 
 		#region Internal Properties
 
-		 private SphereColliderGroundChecker SphereColliderGroundChecker {
+		private SphereColliderGroundChecker SphereColliderGroundChecker {
 			get {
 				if (m_SphereColliderGroundChecker == null) {
 					Print.Warning("CarModelPrefab missing SphereColliderGroundChecker");
@@ -101,7 +99,6 @@ namespace Conibear {
 		public float moveInput;
 		public float turnInput;
 
-		public bool isCarGrounded;
 
 		// Update is called once per frame
 		private void Update() {
