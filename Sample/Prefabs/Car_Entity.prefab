@@ -46,16 +46,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e11538ee29fc29848b5ccd4dbd7b9444, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_FrontLeftWheelModelTransform: {fileID: 3260979673121530196}
-  m_FrontRightWheelModelTransform: {fileID: 2870311278844665670}
-  m_RearLeftWheelModelTransform: {fileID: 3208990831329085616}
-  m_RearRightWheelModelTransform: {fileID: 3638407741130530307}
-  m_FrontLeftWheelCollider: {fileID: 7330392396443864430}
-  m_FrontRightWheelCollider: {fileID: 5292121246536138989}
-  m_RearLeftWheelCollider: {fileID: 8373328775913635505}
-  m_RearRightWheelCollider: {fileID: 2986352149512800350}
-  maxSteerAngle: 30
-  motorForce: 500
+  m_VehicleData: {fileID: 0}
+  m_FrontLeftWheel:
+    m_WheelModelTransform: {fileID: 3260979673121530196}
+    m_WheelCollider: {fileID: 7330392396443864430}
+  m_FrontRightWheel:
+    m_WheelModelTransform: {fileID: 2870311278844665670}
+    m_WheelCollider: {fileID: 5292121246536138989}
+  m_RearLeftWheel:
+    m_WheelModelTransform: {fileID: 3208990831329085616}
+    m_WheelCollider: {fileID: 8373328775913635505}
+  m_RearRightWheel:
+    m_WheelModelTransform: {fileID: 3638407741130530307}
+    m_WheelCollider: {fileID: 2986352149512800350}
 --- !u!54 &6965560909739356448
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -112,7 +115,7 @@ PrefabInstance:
     - target: {fileID: 6679380736405408841, guid: f1f0de50dcfb8234bacb075e80386b62,
         type: 3}
       propertyPath: m_Name
-      value: Realistic_Car_Model
+      value: Car_Model
       objectReference: {fileID: 0}
     - target: {fileID: 7579313648115419073, guid: f1f0de50dcfb8234bacb075e80386b62,
         type: 3}
