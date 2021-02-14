@@ -1,23 +1,58 @@
-﻿using UnityEngine.Experimental.XR;
+﻿using System;
 
 namespace Conibear {
-	using System.Collections;
-	using System.Collections.Generic;
 	using UnityEngine;
 
-	[RequireComponent(typeof(Rigidbody))]
 	public class Car : MonoBehaviour {
-		#region SerializeField
+		#region Internal Fields
 
-		[SerializeField]
-		private CarData m_CarData = null;
+		private Rigidbody m_Rigidbody = null;
 
 		#endregion
 
 
 		#region Internal Fields
 
-		private Rigidbody m_Rigidbody = null;
+		private SphereColliderGroundChecker m_SphereColliderGroundChecker = null;
+
+		#endregion
+
+
+		public Vector3 PseudoGravity {
+			get {
+				if (m_PseudoGravity < 0) {
+					m_PseudoGravity = 0;
+				}
+
+				return new Vector3(0, -m_PseudoGravity, 0);
+			}
+		}
+
+
+		#region Internal Properties
+
+		 private SphereColliderGroundChecker SphereColliderGroundChecker {
+			get {
+				if (m_SphereColliderGroundChecker == null) {
+					Print.Warning("CarModelPrefab missing SphereColliderGroundChecker");
+					m_SphereColliderGroundChecker = this.GetComponentInChildren<SphereColliderGroundChecker>();
+				}
+
+				return m_SphereColliderGroundChecker;
+			}
+		}
+
+		#endregion
+
+
+		#region SerializeField
+
+		[SerializeField]
+		private CarData m_CarData = null;
+
+		[SerializeField]
+		[Range(0.0f, 100f)]
+		private float m_PseudoGravity = 10f;
 
 		#endregion
 
@@ -51,13 +86,48 @@ namespace Conibear {
 		#region MonoBehaviour Methods
 
 		// Start is called before the first frame update
-		void Start() {
-			this.Initialization();
+
+		private void Awake() {
+			m_SphereColliderGroundChecker = GetComponentInChildren<SphereColliderGroundChecker>();
 		}
 
+		private void Start() {
+			this.Initialization();
+
+
+			m_SphereRigidbody.transform.parent = null;
+		}
+
+		public float moveInput;
+		public float turnInput;
+
+		public bool isCarGrounded;
+
 		// Update is called once per frame
-		void Update() {
-			this.Drive(Vector2.up);
+		private void Update() {
+			//this.DriveWithVelocity(Vector2.up);
+			moveInput = Input.GetAxisRaw("Vertical");
+			turnInput = Input.GetAxisRaw("Horizontal");
+
+			moveInput *= moveInput > 0 ? CarData.m_ForwardForce : CarData.m_ReverseForce;
+
+			transform.position = m_SphereRigidbody.transform.position;
+
+			float newRotation = turnInput * CarData.m_Torque * Time.deltaTime * Input.GetAxisRaw("Vertical");
+			transform.Rotate(0, newRotation, 0, Space.World);
+		}
+
+		public Rigidbody m_SphereRigidbody = null;
+
+		private void FixedUpdate() {
+			m_SphereRigidbody.AddForce(transform.forward * moveInput, ForceMode.Acceleration);
+		}
+
+		private void LateUpdate() {
+			RaycastHit hit;
+			if (!this.SphereColliderGroundChecker.IsGrounded(out hit)) {
+				//this.ApplyPseudoGravity();
+			}
 		}
 
 		#endregion
@@ -66,15 +136,37 @@ namespace Conibear {
 		#region Internal Methods
 
 		private void Initialization() {
-			this.SpawnCar();
+			//this.InitializePhysics();
+			//this.SpawnCar();
+		}
+
+		private void InitializePhysics() {
+			this.Rigidbody.mass = this.CarData.Mass;
 		}
 
 		private void SpawnCar() {
 			Instantiate(CarData.CarModelPrefab, this.transform);
 		}
 
-		private void Drive(Vector2 direction) {
-			Rigidbody.velocity = new Vector3(direction.x, 0, direction.y);
+		private void ApplyPseudoGravity() {
+			this.Rigidbody.velocity += this.PseudoGravity;
+		}
+
+		#endregion
+
+
+		#region Public Methods
+
+		/// <summary>
+		/// Call in an update cycle to move the car in the given direction
+		/// </summary>
+		/// <param name="direction">-x:left | +x:right | +y:forward | -y:backwards</param>
+		public void DriveWithVelocity(Vector2 direction) {
+			var y = this.Rigidbody.velocity.y;
+			this.Rigidbody.velocity = new Vector3(direction.x, y, direction.y);
+		}
+
+		public void DriveWithForce() {
 		}
 
 		#endregion
