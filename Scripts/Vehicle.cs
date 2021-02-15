@@ -50,6 +50,8 @@
 			sidewaysWheelFrictionCurve.asymptoteValue = 0.75f; // unity default
 			sidewaysWheelFrictionCurve.stiffness = vehicleData.SidwaysStiffness;
 
+			this.WheelCollider.radius = vehicleData.WheelRadius;
+			this.WheelCollider.center = vehicleData.WheelCenter;
 			this.WheelCollider.suspensionSpring = jointSpring;
 			this.WheelCollider.forwardFriction = forwardWheelFrictionCurve;
 			this.WheelCollider.sidewaysFriction = sidewaysWheelFrictionCurve;
@@ -101,6 +103,9 @@
 
 		#region Internal Fields
 
+		// 
+		private const float m_MetersPerSecondConversionRateToKilometerPerHour = 3.6f;
+
 		private Rigidbody m_Rigidbody;
 
 		private bool m_IsBreaking = false;
@@ -117,6 +122,22 @@
 				}
 
 				return m_Rigidbody;
+			}
+		}
+
+		#endregion
+
+
+		#region Public Properties
+
+		public float KilometerPerHour {
+			get {
+				var velocity = this.Rigidbody.velocity;
+				var forwardWheelRotation = this.Rigidbody.transform.rotation * Vector3.forward;
+				float vProj = Vector3.Dot(velocity, forwardWheelRotation);
+				var projVelocity = vProj * forwardWheelRotation;
+				float speed = projVelocity.magnitude * Mathf.Sign(vProj);
+				return speed * m_MetersPerSecondConversionRateToKilometerPerHour;
 			}
 		}
 
@@ -144,6 +165,8 @@
 
 		private void LateUpdate() {
 			UpdateWheelPositions();
+
+			Print.Message($"KilometerPerHour: <{this.KilometerPerHour}>", this);
 		}
 
 		#endregion
@@ -181,7 +204,6 @@
 				return;
 			}
 
-			Print.Message($"this.Rigidbody.velocity.z: <{this.Rigidbody.velocity.z}>");
 			var localVelocity = this.Rigidbody.transform.InverseTransformDirection(this.Rigidbody.velocity);
 			if (input < 0f && localVelocity.z > 0f || input > 0f && localVelocity.z < 0f) { // moving in opposite direction of input
 				this.ApplyBreak();

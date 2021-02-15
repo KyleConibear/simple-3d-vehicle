@@ -27,7 +27,7 @@
 
 		[SerializeField]
 		[Tooltip("General over the drivers seat.\nOffset from calculation using sum of colliders")]
-		[Range(0,10)]
+		[Range(0, 10)]
 		private float m_CenterOfMassOffSet = 1f;
 
 		[SerializeField]
@@ -39,6 +39,14 @@
 		private float m_AngularDrag = 0.05f;
 
 		[Header("Wheel Collider Settings")]
+		[Header("Wheels")]
+		[SerializeField]
+		[Range(0.1f, 1)]
+		private float m_WheelRadius = 0.5f;
+
+		[SerializeField]
+		private Vector3 m_WheelCenter = Vector3.zero;
+
 		[Header("Suspension Spring")]
 		[Tooltip("Spring force attempts to reach the Target Position.\nA larger value makes the suspension reach the Target Position faster.")]
 		[SerializeField]
@@ -78,6 +86,8 @@
 		public float CenterOfMassOffSet => m_CenterOfMassOffSet;
 		public float Drag => m_Drag;
 		public float AngularDrag => m_AngularDrag;
+		public float WheelRadius => m_WheelRadius;
+		public Vector3 WheelCenter => m_WheelCenter;
 		public float Spring => this.Mass * m_SpringMultipleOfMass;
 		public float Damper => this.Spring * m_DamperAsPercentageOfSpring;
 		public float TargetPosition => m_TargetPosition;

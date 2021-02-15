@@ -27685,6 +27685,11 @@ PrefabInstance:
       propertyPath: m_Mass
       value: 1500
       objectReference: {fileID: 0}
+    - target: {fileID: 6965560909739356448, guid: d04b01e95c24c4740bbc7b2770793733,
+        type: 3}
+      propertyPath: m_Drag
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 7330392396443864430, guid: d04b01e95c24c4740bbc7b2770793733,
         type: 3}
       propertyPath: m_Center.y
