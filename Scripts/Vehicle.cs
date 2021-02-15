@@ -16,6 +16,45 @@
 		public Transform WheelModelTransform => m_WheelModelTransform;
 		public WheelCollider WheelCollider => m_WheelCollider;
 
+
+		public float SuspensionTravel {
+			get {
+				var wheel = this.WheelCollider;
+				float travel = 1.0f;
+				WheelHit hit;
+				if (this.IsGrounded(out hit)) {
+					travel = (-wheel.transform.InverseTransformPoint(hit.point).y - wheel.radius) / wheel.suspensionDistance;
+				}
+
+				return travel;
+			}
+		}
+
+		public void InitializeWheelCollider(VehicleData vehicleData) {
+			var jointSpring = new JointSpring();
+			jointSpring.spring = vehicleData.Spring;
+			jointSpring.damper = vehicleData.Damper;
+			jointSpring.targetPosition = vehicleData.TargetPosition;
+
+			var forwardWheelFrictionCurve = new WheelFrictionCurve();
+			forwardWheelFrictionCurve.extremumSlip = 0.4f; // unity default
+			forwardWheelFrictionCurve.extremumValue = 1f; // unity default
+			forwardWheelFrictionCurve.asymptoteSlip = 0.8f; // unity default
+			forwardWheelFrictionCurve.asymptoteValue = 0.5f; // unity default
+			forwardWheelFrictionCurve.stiffness = vehicleData.ForwardStiffness;
+
+			var sidewaysWheelFrictionCurve = new WheelFrictionCurve();
+			sidewaysWheelFrictionCurve.extremumSlip = 0.2f; // unity default
+			sidewaysWheelFrictionCurve.extremumValue = 1f; // unity default
+			sidewaysWheelFrictionCurve.asymptoteSlip = 0.5f; // unity default
+			sidewaysWheelFrictionCurve.asymptoteValue = 0.75f; // unity default
+			sidewaysWheelFrictionCurve.stiffness = vehicleData.SidwaysStiffness;
+
+			this.WheelCollider.suspensionSpring = jointSpring;
+			this.WheelCollider.forwardFriction = forwardWheelFrictionCurve;
+			this.WheelCollider.sidewaysFriction = sidewaysWheelFrictionCurve;
+		}
+
 		public void ApplyBreak(float breakForce) {
 			this.WheelCollider.brakeTorque = breakForce;
 		}
@@ -24,7 +63,14 @@
 			this.WheelCollider.brakeTorque = 0;
 		}
 
+		public bool IsGrounded(out WheelHit hit) {
+			return this.WheelCollider.GetGroundHit(out hit);
+		}
+
 		public void UpdateWheelPosition() {
+			if (this.WheelModelTransform == null)
+				return;
+
 			var position = this.WheelModelTransform.position;
 			var rotation = this.WheelModelTransform.rotation;
 
@@ -79,9 +125,15 @@
 
 		#region MonoBehaviour Methods
 
+		private void Start() {
+			this.InitializeRigidbody();
+			this.InitializeWheels();
+		}
+
 		private void FixedUpdate() {
-			Steer(Input.GetAxis("Horizontal"));
-			Accelerate(Input.GetAxis("Vertical"));
+			this.Steer(Input.GetAxis("Horizontal"));
+			this.Accelerate(Input.GetAxis("Vertical"));
+			this.UpdateStabilizerBars();
 
 			if (Input.GetKey(KeyCode.Space)) {
 				this.ApplyBreak();
@@ -99,6 +151,24 @@
 
 		#region Internal Methods
 
+		private void InitializeRigidbody() {
+			this.Rigidbody.mass = m_VehicleData.Mass;
+			this.Rigidbody.centerOfMass += new Vector3(0, 0, m_VehicleData.CenterOfMassOffSet);
+			this.Rigidbody.drag = m_VehicleData.Drag;
+			this.Rigidbody.angularDrag = m_VehicleData.AngularDrag;
+		}
+
+		private void InitializeWheels() {
+			var spring = m_VehicleData.Spring;
+			var forwardStiffness = m_VehicleData.ForwardStiffness;
+			var sidewaysStiffness = m_VehicleData.SidwaysStiffness;
+
+			m_FrontLeftWheel.InitializeWheelCollider(m_VehicleData);
+			m_FrontRightWheel.InitializeWheelCollider(m_VehicleData);
+			m_RearLeftWheel.InitializeWheelCollider(m_VehicleData);
+			m_RearRightWheel.InitializeWheelCollider(m_VehicleData);
+		}
+
 		private void Steer(float input) {
 			var m_steeringAngle = m_VehicleData.MaxSteerAngle * input;
 
@@ -107,7 +177,13 @@
 		}
 
 		private void Accelerate(float input) {
-			if (input < 0 && this.Rigidbody.velocity.z > 0 || input > 0 && this.Rigidbody.velocity.z < 0) { // moving in opposite direction of input
+			if (input == 0) {
+				return;
+			}
+
+			Print.Message($"this.Rigidbody.velocity.z: <{this.Rigidbody.velocity.z}>");
+			var localVelocity = this.Rigidbody.transform.InverseTransformDirection(this.Rigidbody.velocity);
+			if (input < 0f && localVelocity.z > 0f || input > 0f && localVelocity.z < 0f) { // moving in opposite direction of input
 				this.ApplyBreak();
 				return;
 			}
@@ -134,6 +210,41 @@
 			m_FrontRightWheel.ReleaseBreak();
 			m_RearLeftWheel.ReleaseBreak();
 			m_RearRightWheel.ReleaseBreak();
+		}
+
+		private void UpdateStabilizerBars() {
+			this.UpdateFrontStabilizerBar();
+			this.UpdateRearStabilizerBar();
+		}
+
+		private void UpdateFrontStabilizerBar() {
+			var antiRollForce = (m_FrontLeftWheel.SuspensionTravel - m_FrontRightWheel.SuspensionTravel) * this.m_VehicleData.Spring;
+
+			if (m_FrontLeftWheel.IsGrounded(out var leftWheelHit)) {
+				var leftWheelForce = m_FrontLeftWheel.WheelCollider.transform.up * -antiRollForce;
+				m_Rigidbody.AddForceAtPosition(leftWheelForce, m_FrontLeftWheel.WheelCollider.transform.position);
+			}
+
+
+			if (m_FrontRightWheel.IsGrounded(out var rightWheelHit)) {
+				var rightWheelForce = m_FrontRightWheel.WheelCollider.transform.up * antiRollForce;
+				m_Rigidbody.AddForceAtPosition(rightWheelForce, m_FrontRightWheel.WheelCollider.transform.position);
+			}
+		}
+
+		private void UpdateRearStabilizerBar() {
+			var antiRollForce = (m_RearLeftWheel.SuspensionTravel - m_RearRightWheel.SuspensionTravel) * this.m_VehicleData.Spring;
+
+			if (m_RearLeftWheel.IsGrounded(out var leftWheelHit)) {
+				var leftWheelForce = m_RearLeftWheel.WheelCollider.transform.up * -antiRollForce;
+				m_Rigidbody.AddForceAtPosition(leftWheelForce, m_RearLeftWheel.WheelCollider.transform.position);
+			}
+
+
+			if (m_RearRightWheel.IsGrounded(out var rightWheelHit)) {
+				var rightWheelForce = m_RearRightWheel.WheelCollider.transform.up * antiRollForce;
+				m_Rigidbody.AddForceAtPosition(rightWheelForce, m_RearRightWheel.WheelCollider.transform.position);
+			}
 		}
 
 		private void UpdateWheelPositions() {

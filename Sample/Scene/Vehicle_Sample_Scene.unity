@@ -27655,10 +27655,65 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 16cfc0e8d7350e64884da87e071f5b60,
         type: 2}
+    - target: {fileID: 2986352149512800350, guid: d04b01e95c24c4740bbc7b2770793733,
+        type: 3}
+      propertyPath: m_Center.y
+      value: 0.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 2986352149512800350, guid: d04b01e95c24c4740bbc7b2770793733,
+        type: 3}
+      propertyPath: m_Radius
+      value: 0.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 5292121246536138989, guid: d04b01e95c24c4740bbc7b2770793733,
+        type: 3}
+      propertyPath: m_Center.y
+      value: 0.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 5292121246536138989, guid: d04b01e95c24c4740bbc7b2770793733,
+        type: 3}
+      propertyPath: m_Radius
+      value: 0.35
+      objectReference: {fileID: 0}
     - target: {fileID: 5567630243145388759, guid: d04b01e95c24c4740bbc7b2770793733,
         type: 3}
       propertyPath: m_Name
       value: Car_Entity
+      objectReference: {fileID: 0}
+    - target: {fileID: 6965560909739356448, guid: d04b01e95c24c4740bbc7b2770793733,
+        type: 3}
+      propertyPath: m_Mass
+      value: 1500
+      objectReference: {fileID: 0}
+    - target: {fileID: 7330392396443864430, guid: d04b01e95c24c4740bbc7b2770793733,
+        type: 3}
+      propertyPath: m_Center.y
+      value: 0.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 7330392396443864430, guid: d04b01e95c24c4740bbc7b2770793733,
+        type: 3}
+      propertyPath: m_Radius
+      value: 0.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 8373328775913635505, guid: d04b01e95c24c4740bbc7b2770793733,
+        type: 3}
+      propertyPath: m_ForwardFriction.m_Stiffness
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8373328775913635505, guid: d04b01e95c24c4740bbc7b2770793733,
+        type: 3}
+      propertyPath: m_SidewaysFriction.m_Stiffness
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8373328775913635505, guid: d04b01e95c24c4740bbc7b2770793733,
+        type: 3}
+      propertyPath: m_Radius
+      value: 0.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 8373328775913635505, guid: d04b01e95c24c4740bbc7b2770793733,
+        type: 3}
+      propertyPath: m_Center.y
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 8798908291655377187, guid: d04b01e95c24c4740bbc7b2770793733,
         type: 3}
