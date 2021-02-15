@@ -2,15 +2,7 @@
 A realistic 3d vechile made in using uutilizing wheel colliders.
 
 
-Accreditation
-
-Techincal Support
-
-Title: How to make a physically real, stable car using WheelColliders
-   By: Edy
-  URL: https://forum.unity.com/threads/how-to-make-a-physically-real-stable-car-with-wheelcolliders.50643
-
-Sample Assets
+Sample Assets Accreditation
 
 Title: ARCADE: FREE Racing Car
    By: Mena
