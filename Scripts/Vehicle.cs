@@ -102,8 +102,7 @@
 
 
 		#region Internal Fields
-
-		// 
+		
 		private const float m_MetersPerSecondConversionRateToKilometerPerHour = 3.6f;
 
 		private Rigidbody m_Rigidbody;
