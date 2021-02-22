@@ -3,8 +3,8 @@
 	using System.Collections.Generic;
 	using UnityEngine;
 
-	[CreateAssetMenu(menuName = "VehicleData")]
-	public class VehicleData : ScriptableObject {
+	[CreateAssetMenu(menuName = "RealisticVehicleData")]
+	public class RealisticVehicleData : ScriptableObject {
 		#region SerializeField
 
 		[SerializeField]

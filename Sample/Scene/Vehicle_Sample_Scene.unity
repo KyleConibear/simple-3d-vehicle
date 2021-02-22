@@ -381,6 +381,10 @@ MonoBehaviour:
   m_SphereRigidbody: {fileID: 601451246}
   m_CarModel: {fileID: 1204307497}
   m_SphereGroundCheck: {fileID: 601451247}
+  m_GroundLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  isCarGrounded: 0
 --- !u!4 &3595142
 Transform:
   m_ObjectHideFlags: 0
@@ -388,7 +392,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3595140}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: -0.012478812, z: 0, w: 0.9999222}
   m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -396,7 +400,7 @@ Transform:
   - {fileID: 601451251}
   m_Father: {fileID: 0}
   m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -1.43, z: 0}
 --- !u!1 &4075881
 GameObject:
   m_ObjectHideFlags: 0
