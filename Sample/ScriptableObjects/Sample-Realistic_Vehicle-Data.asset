@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 08b9291bff4010e468ca29c67577077d, type: 3}
-  m_Name: Sample_Vehicle-Data
+  m_Name: Sample-Realistic_Vehicle-Data
   m_EditorClassIdentifier: 
   m_MaxSteerAngle: 30
   m_MotorForce: 1500

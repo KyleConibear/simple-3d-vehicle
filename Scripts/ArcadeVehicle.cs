@@ -22,9 +22,7 @@ public class ArcadeVehicle : MonoBehaviour {
 
 	private float m_MoveInput;
 	private float m_TurnInput;
-
-	private Vector3 m_TargetOffset;
-
+	
 	private bool m_IsCarGrounded;
 
 	private void Awake() {
@@ -34,7 +32,6 @@ public class ArcadeVehicle : MonoBehaviour {
 	// Start is called before the first frame update
 	void Start() {
 		m_SphereRigidbody.transform.parent = null;
-		m_TargetOffset = m_CarModel.position - m_SphereRigidbody.position;
 	}
 
 	// Update is called once per frame
@@ -43,7 +40,9 @@ public class ArcadeVehicle : MonoBehaviour {
 		m_TurnInput = Input.GetAxisRaw("Horizontal");
 		m_MoveInput *= m_MoveInput > 0 ? m_ForwardForce : m_ReverseForce;
 
-		transform.position = m_SphereRigidbody.position;
+		//transform.position = m_SphereRigidbody.position;
+		//transform.position = Vector3.MoveTowards(transform.position, m_SphereRigidbody.position, 3);
+		//transform.position = Vector3.Lerp(transform.position, m_SphereRigidbody.position, .1f);
 
 		var newRotation = m_TurnInput * m_TurnSpeed * Time.deltaTime * Input.GetAxisRaw("Vertical");
 		transform.Rotate(0, newRotation, 0, Space.World);
@@ -58,8 +57,12 @@ public class ArcadeVehicle : MonoBehaviour {
 			m_SphereRigidbody.drag = 0.1f;
 		}
 	}
+	
 
 	void FixedUpdate() {
+
+		transform.position = Vector3.MoveTowards(transform.position, m_SphereRigidbody.position, 1);
+		
 		if (m_IsCarGrounded)
 			m_SphereRigidbody.AddForce(transform.forward * m_MoveInput, ForceMode.Acceleration);
 		else {
