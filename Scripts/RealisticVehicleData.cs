@@ -27,8 +27,7 @@
 
 		[SerializeField]
 		[Tooltip("General over the drivers seat.\nOffset from calculation using sum of colliders")]
-		[Range(0, 10)]
-		private float m_CenterOfMassOffSet = 1f;
+		private Vector3 m_CenterOfMassOffSet = Vector3.zero;
 
 		[SerializeField]
 		[Range(0, 0.2f)]
@@ -83,7 +82,7 @@
 		public float BreakForce => m_MotorForce * m_BreakForcePercent;
 
 		public int Mass => m_Mass;
-		public float CenterOfMassOffSet => m_CenterOfMassOffSet;
+		public Vector3 CenterOfMassOffSet => m_CenterOfMassOffSet;
 		public float Drag => m_Drag;
 		public float AngularDrag => m_AngularDrag;
 		public float WheelRadius => m_WheelRadius;

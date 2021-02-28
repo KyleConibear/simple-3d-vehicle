@@ -40,10 +40,6 @@ public class ArcadeVehicle : MonoBehaviour {
 		m_TurnInput = Input.GetAxisRaw("Horizontal");
 		m_MoveInput *= m_MoveInput > 0 ? m_ForwardForce : m_ReverseForce;
 
-		//transform.position = m_SphereRigidbody.position;
-		//transform.position = Vector3.MoveTowards(transform.position, m_SphereRigidbody.position, 3);
-		//transform.position = Vector3.Lerp(transform.position, m_SphereRigidbody.position, .1f);
-
 		var newRotation = m_TurnInput * m_TurnSpeed * Time.deltaTime * Input.GetAxisRaw("Vertical");
 		transform.Rotate(0, newRotation, 0, Space.World);
 
@@ -68,5 +64,7 @@ public class ArcadeVehicle : MonoBehaviour {
 		else {
 			m_SphereRigidbody.AddForce(transform.up * -9.8f * m_SphereRigidbody.mass);
 		}
+		
+		Debug.Log(m_SphereRigidbody.velocity.magnitude * 3.6);
 	}
 }

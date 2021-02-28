@@ -346,12 +346,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 3406787}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &3595142 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6821015374386588445, guid: cc025589e12c99241a44656a2e736c5c,
-    type: 3}
-  m_PrefabInstance: {fileID: 6821015374389883035}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &4075881
 GameObject:
   m_ObjectHideFlags: 0
@@ -12062,6 +12056,12 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 455828, guid: 8d7240f2f0843e442b11595c5465dbf7,
     type: 3}
   m_PrefabInstance: {fileID: 571522494}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &574534580 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8798908291655377187, guid: d04b01e95c24c4740bbc7b2770793733,
+    type: 3}
+  m_PrefabInstance: {fileID: 1401381137}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &579662829
 GameObject:
@@ -28743,6 +28743,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 16cfc0e8d7350e64884da87e071f5b60,
         type: 2}
+    - target: {fileID: 621469851106152004, guid: d04b01e95c24c4740bbc7b2770793733,
+        type: 3}
+      propertyPath: mRealisticVehicleData
+      value: 
+      objectReference: {fileID: 11400000, guid: 16cfc0e8d7350e64884da87e071f5b60,
+        type: 2}
     - target: {fileID: 2986352149512800350, guid: d04b01e95c24c4740bbc7b2770793733,
         type: 3}
       propertyPath: m_Center.y
@@ -28771,7 +28777,7 @@ PrefabInstance:
     - target: {fileID: 5567630243145388759, guid: d04b01e95c24c4740bbc7b2770793733,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6965560909739356448, guid: d04b01e95c24c4740bbc7b2770793733,
         type: 3}
@@ -43420,7 +43426,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c11913101ca071488f88a566958b61a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectToFollow: {fileID: 3595142}
+  objectToFollow: {fileID: 574534580}
   offset: {x: 0, y: 3, z: -10}
   followSpeed: 10
   lookSpeed: 10
@@ -44967,6 +44973,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Arcade-Car_Entity
+      objectReference: {fileID: 0}
+    - target: {fileID: 6821015374386588447, guid: cc025589e12c99241a44656a2e736c5c,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cc025589e12c99241a44656a2e736c5c, type: 3}

@@ -175,7 +175,7 @@
 
 		private void InitializeRigidbody() {
 			this.Rigidbody.mass = mRealisticVehicleData.Mass;
-			this.Rigidbody.centerOfMass += new Vector3(0, 0, mRealisticVehicleData.CenterOfMassOffSet);
+			this.Rigidbody.centerOfMass += mRealisticVehicleData.CenterOfMassOffSet;
 			this.Rigidbody.drag = mRealisticVehicleData.Drag;
 			this.Rigidbody.angularDrag = mRealisticVehicleData.AngularDrag;
 		}
