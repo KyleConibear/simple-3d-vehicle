@@ -191,11 +191,29 @@
 			m_RearRightWheel.InitializeWheelCollider(m_RealisticVehicleData);
 		}
 
-		private void Steer(float input) {
-			var m_steeringAngle = m_RealisticVehicleData.MaxSteerAngle * input;
+		public float radius = 6;
 
-			m_FrontLeftWheel.WheelCollider.steerAngle = m_steeringAngle;
-			m_FrontRightWheel.WheelCollider.steerAngle = m_steeringAngle;
+		private void Steer(float input) {
+			// Acerman steering formula
+			// Inner wheel turns slightly more than outer for improved control
+
+			var wheelBase = m_RealisticVehicleData.WheelBase;
+			var turnRadius = m_RealisticVehicleData.TurnRadius;
+			var rearTrack = m_RealisticVehicleData.RearTrack;
+			
+			float leftSteeringAngle = 0;
+			float rightSteeringAngle = 0;
+
+			if (input > 0) {
+				leftSteeringAngle = Mathf.Rad2Deg * Mathf.Atan((wheelBase / (turnRadius + (rearTrack / 2)))) * input;
+				rightSteeringAngle = Mathf.Rad2Deg * Mathf.Atan((wheelBase / (turnRadius - (rearTrack / 2)))) * input;
+			} else if (input < 0) {
+				leftSteeringAngle = Mathf.Rad2Deg * Mathf.Atan((wheelBase / (turnRadius - (rearTrack / 2)))) * input;
+				rightSteeringAngle = Mathf.Rad2Deg * Mathf.Atan((wheelBase / (turnRadius + (rearTrack / 2)))) * input;
+			}
+
+			m_FrontLeftWheel.WheelCollider.steerAngle = leftSteeringAngle;
+			m_FrontRightWheel.WheelCollider.steerAngle = rightSteeringAngle;
 		}
 
 		private void Accelerate(float input) {

@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e11538ee29fc29848b5ccd4dbd7b9444, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mRealisticVehicleData: {fileID: 11400000, guid: 16cfc0e8d7350e64884da87e071f5b60,
+  m_RealisticVehicleData: {fileID: 11400000, guid: 16cfc0e8d7350e64884da87e071f5b60,
     type: 2}
   m_FrontLeftWheel:
     m_WheelModelTransform: {fileID: 3260979673121530196}
@@ -60,6 +60,7 @@ MonoBehaviour:
   m_RearRightWheel:
     m_WheelModelTransform: {fileID: 3638407741130530307}
     m_WheelCollider: {fileID: 2986352149512800350}
+  radius: 6
 --- !u!54 &6965560909739356448
 Rigidbody:
   m_ObjectHideFlags: 0

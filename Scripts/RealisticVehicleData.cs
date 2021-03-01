@@ -13,12 +13,9 @@
 	public class RealisticVehicleData : ScriptableObject {
 		#region SerializeField
 
+		[Header("General Car Specs")]
 		[SerializeField]
 		private WheelDriveType m_WheelDriveType = WheelDriveType.RearWheelDrive;
-
-		[SerializeField]
-		[Range(30, 45)]
-		private float m_MaxSteerAngle = 30;
 
 		[SerializeField]
 		private float m_MotorForce = 500;
@@ -28,6 +25,21 @@
 		[Range(1.25f, 5)]
 		private float m_BreakForcePercent = 2f;
 
+		[SerializeField]
+		[Range(30, 45)]
+		private float m_MaxSteerAngle = 30;
+
+		[SerializeField]
+		[Tooltip("The distance between the front and rear axles")]
+		private float m_WheelBase = 2.5f;
+
+		[SerializeField]
+		[Tooltip("The width between the rear wheels")]
+		private float m_RearTrack = 1.5f;
+
+		[SerializeField]
+		[Tooltip("The tightest circle it can make with the steering wheel turned full to one side")]
+		private float m_TurnRadius = 10f;
 
 		[Header("Rigidbody Settings")]
 		[SerializeField]
@@ -86,11 +98,14 @@
 
 
 		#region Public Properties
+
 		public WheelDriveType WheelDriveType => m_WheelDriveType;
-		public float MaxSteerAngle => m_MaxSteerAngle;
 		public float MotorForce => m_MotorForce;
 		public float BreakForce => m_MotorForce * m_BreakForcePercent;
-
+		public float MaxSteerAngle => m_MaxSteerAngle;
+		public float WheelBase => m_WheelBase;
+		public float RearTrack => m_RearTrack;
+		public float TurnRadius => m_TurnRadius;
 		public int Mass => m_Mass;
 		public Vector3 CenterOfMassOffSet => m_CenterOfMassOffSet;
 		public float Drag => m_Drag;
