@@ -3,11 +3,21 @@
 	using System.Collections.Generic;
 	using UnityEngine;
 
+	public enum WheelDriveType {
+		RearWheelDrive,
+		FrontWheelDrive,
+		AllWheelDrive
+	}
+
 	[CreateAssetMenu(menuName = "RealisticVehicleData")]
 	public class RealisticVehicleData : ScriptableObject {
 		#region SerializeField
 
 		[SerializeField]
+		private WheelDriveType m_WheelDriveType = WheelDriveType.RearWheelDrive;
+
+		[SerializeField]
+		[Range(30, 45)]
 		private float m_MaxSteerAngle = 30;
 
 		[SerializeField]
@@ -76,7 +86,7 @@
 
 
 		#region Public Properties
-
+		public WheelDriveType WheelDriveType => m_WheelDriveType;
 		public float MaxSteerAngle => m_MaxSteerAngle;
 		public float MotorForce => m_MotorForce;
 		public float BreakForce => m_MotorForce * m_BreakForcePercent;

@@ -89,7 +89,7 @@
 
 		[Header("Data")]
 		[SerializeField]
-		private RealisticVehicleData mRealisticVehicleData;
+		private RealisticVehicleData m_RealisticVehicleData;
 
 		[Header("Wheels")]
 		[SerializeField]
@@ -102,7 +102,7 @@
 
 
 		#region Internal Fields
-		
+
 		private const float m_MetersPerSecondConversionRateToKilometerPerHour = 3.6f;
 
 		private Rigidbody m_Rigidbody;
@@ -174,25 +174,25 @@
 		#region Internal Methods
 
 		private void InitializeRigidbody() {
-			this.Rigidbody.mass = mRealisticVehicleData.Mass;
-			this.Rigidbody.centerOfMass += mRealisticVehicleData.CenterOfMassOffSet;
-			this.Rigidbody.drag = mRealisticVehicleData.Drag;
-			this.Rigidbody.angularDrag = mRealisticVehicleData.AngularDrag;
+			this.Rigidbody.mass = m_RealisticVehicleData.Mass;
+			this.Rigidbody.centerOfMass += m_RealisticVehicleData.CenterOfMassOffSet;
+			this.Rigidbody.drag = m_RealisticVehicleData.Drag;
+			this.Rigidbody.angularDrag = m_RealisticVehicleData.AngularDrag;
 		}
 
 		private void InitializeWheels() {
-			var spring = mRealisticVehicleData.Spring;
-			var forwardStiffness = mRealisticVehicleData.ForwardStiffness;
-			var sidewaysStiffness = mRealisticVehicleData.SidwaysStiffness;
+			var spring = m_RealisticVehicleData.Spring;
+			var forwardStiffness = m_RealisticVehicleData.ForwardStiffness;
+			var sidewaysStiffness = m_RealisticVehicleData.SidwaysStiffness;
 
-			m_FrontLeftWheel.InitializeWheelCollider(mRealisticVehicleData);
-			m_FrontRightWheel.InitializeWheelCollider(mRealisticVehicleData);
-			m_RearLeftWheel.InitializeWheelCollider(mRealisticVehicleData);
-			m_RearRightWheel.InitializeWheelCollider(mRealisticVehicleData);
+			m_FrontLeftWheel.InitializeWheelCollider(m_RealisticVehicleData);
+			m_FrontRightWheel.InitializeWheelCollider(m_RealisticVehicleData);
+			m_RearLeftWheel.InitializeWheelCollider(m_RealisticVehicleData);
+			m_RearRightWheel.InitializeWheelCollider(m_RealisticVehicleData);
 		}
 
 		private void Steer(float input) {
-			var m_steeringAngle = mRealisticVehicleData.MaxSteerAngle * input;
+			var m_steeringAngle = m_RealisticVehicleData.MaxSteerAngle * input;
 
 			m_FrontLeftWheel.WheelCollider.steerAngle = m_steeringAngle;
 			m_FrontRightWheel.WheelCollider.steerAngle = m_steeringAngle;
@@ -213,16 +213,33 @@
 				this.ReleaseBreak();
 			}
 
-			m_RearLeftWheel.WheelCollider.motorTorque = input * mRealisticVehicleData.MotorForce;
-			m_RearRightWheel.WheelCollider.motorTorque = input * mRealisticVehicleData.MotorForce;
+			int numberOfWheels = m_RealisticVehicleData.WheelDriveType == WheelDriveType.AllWheelDrive ? 4 : 2;
+			float moterPower = input * (m_RealisticVehicleData.MotorForce / numberOfWheels);
+
+			switch (m_RealisticVehicleData.WheelDriveType) {
+				case WheelDriveType.RearWheelDrive:
+					m_RearLeftWheel.WheelCollider.motorTorque = moterPower;
+					m_RearRightWheel.WheelCollider.motorTorque = moterPower;
+					break;
+				case WheelDriveType.FrontWheelDrive:
+					m_FrontLeftWheel.WheelCollider.motorTorque = moterPower;
+					m_FrontRightWheel.WheelCollider.motorTorque = moterPower;
+					break;
+				case WheelDriveType.AllWheelDrive:
+					m_FrontLeftWheel.WheelCollider.motorTorque = moterPower;
+					m_FrontRightWheel.WheelCollider.motorTorque = moterPower;
+					m_RearLeftWheel.WheelCollider.motorTorque = moterPower;
+					m_RearRightWheel.WheelCollider.motorTorque = moterPower;
+					break;
+			}
 		}
 
 		private void ApplyBreak() {
 			m_IsBreaking = true;
-			m_FrontLeftWheel.ApplyBreak(mRealisticVehicleData.BreakForce);
-			m_FrontRightWheel.ApplyBreak(mRealisticVehicleData.BreakForce);
-			m_RearLeftWheel.ApplyBreak(mRealisticVehicleData.BreakForce);
-			m_RearRightWheel.ApplyBreak(mRealisticVehicleData.BreakForce);
+			m_FrontLeftWheel.ApplyBreak(m_RealisticVehicleData.BreakForce);
+			m_FrontRightWheel.ApplyBreak(m_RealisticVehicleData.BreakForce);
+			m_RearLeftWheel.ApplyBreak(m_RealisticVehicleData.BreakForce);
+			m_RearRightWheel.ApplyBreak(m_RealisticVehicleData.BreakForce);
 		}
 
 		private void ReleaseBreak() {
@@ -239,7 +256,7 @@
 		}
 
 		private void UpdateFrontStabilizerBar() {
-			var antiRollForce = (m_FrontLeftWheel.SuspensionTravel - m_FrontRightWheel.SuspensionTravel) * this.mRealisticVehicleData.Spring;
+			var antiRollForce = (m_FrontLeftWheel.SuspensionTravel - m_FrontRightWheel.SuspensionTravel) * this.m_RealisticVehicleData.Spring;
 
 			if (m_FrontLeftWheel.IsGrounded(out var leftWheelHit)) {
 				var leftWheelForce = m_FrontLeftWheel.WheelCollider.transform.up * -antiRollForce;
@@ -254,7 +271,7 @@
 		}
 
 		private void UpdateRearStabilizerBar() {
-			var antiRollForce = (m_RearLeftWheel.SuspensionTravel - m_RearRightWheel.SuspensionTravel) * this.mRealisticVehicleData.Spring;
+			var antiRollForce = (m_RearLeftWheel.SuspensionTravel - m_RearRightWheel.SuspensionTravel) * this.m_RealisticVehicleData.Spring;
 
 			if (m_RearLeftWheel.IsGrounded(out var leftWheelHit)) {
 				var leftWheelForce = m_RearLeftWheel.WheelCollider.transform.up * -antiRollForce;
