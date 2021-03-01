@@ -194,7 +194,7 @@
 		public float radius = 6;
 
 		private void Steer(float input) {
-			// Acerman steering formula
+			// Ackermann steering formula
 			// Inner wheel turns slightly more than outer for improved control
 
 			var wheelBase = m_RealisticVehicleData.WheelBase;
