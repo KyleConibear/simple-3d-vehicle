@@ -98,8 +98,8 @@
 		private void InitializeRigidbody() {
 			this.Rigidbody.mass = m_Vehicle.Mass;
 			this.Rigidbody.centerOfMass += m_Vehicle.CenterOfMassOffSet;
-			this.Rigidbody.drag = m_Vehicle.Drag;
-			this.Rigidbody.angularDrag = m_Vehicle.AngularDrag;
+			this.Rigidbody.drag = RealisticVehiclePrefab.RigidbodyDrag;
+			this.Rigidbody.angularDrag = RealisticVehiclePrefab.RigidbodyAngularDrag;
 		}
 
 		private void InitializeVehicle() {

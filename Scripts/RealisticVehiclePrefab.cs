@@ -121,6 +121,15 @@ namespace Conibear {
 	}
 
 	public class RealisticVehiclePrefab : MonoBehaviour {
+		#region Public Fields
+
+		public const float RigidbodyDrag = 0f;
+		public const float RigidbodyAngularDrag = 0f;
+		public const float WheelColliderSuspensionSpringTargetPosition = 0.5f;
+
+		#endregion
+
+
 		#region ShowOnly Fields
 
 		[Header("ReadOnly Stats")]
@@ -171,7 +180,7 @@ namespace Conibear {
 		private float m_MaxSteerAngle = 30;
 
 		[SerializeField]
-		[Range(6,24)]
+		[Range(6, 24)]
 		[Tooltip("The tightest circle it can make with the steering wheel turned full to one side.")]
 		private float m_TurnRadius = 9f;
 
@@ -182,16 +191,12 @@ namespace Conibear {
 		private int m_Mass = 2000;
 
 		[SerializeField]
-		[Tooltip("General over the drivers seat.\nOffset from calculation using sum of colliders.")]
-		private Vector3 m_CenterOfMassOffSet = Vector3.zero;
+		[Range(-1, 1)]
+		private float m_CenterOfMassYPosition = 0f;
 
 		[SerializeField]
-		[Range(0, 0.2f)]
-		private float m_Drag = 0.1f;
-
-		[SerializeField]
-		[Range(0, 0.1f)]
-		private float m_AngularDrag = 0.05f;
+		[Range(-1, 1)]
+		private float m_CenterOfMassZPosition = 0f;
 
 		[Header("Wheel Collider Settings")]
 		[Header("Wheels")]
@@ -216,7 +221,7 @@ namespace Conibear {
 		         "For a standard family car the value of forceAppPointDistance should be tuned to place the application point approximately 0.3m below the rigidbody center of mass.\n" +
 		         "Moving the application point downwards introduces more roll when cornering, while moving it upwards results in less roll when cornering.\n" +
 		         "The force application point is typically below the rigid body center of mass.")]
-		private float m_ForceAppPointDistance;
+		private float m_ForceAppPointDistance = 0.3f;
 
 		[Header("Suspension Spring")]
 		[SerializeField]
@@ -297,9 +302,7 @@ namespace Conibear {
 
 		public float TurnRadius => m_TurnRadius;
 		public int Mass => m_Mass;
-		public Vector3 CenterOfMassOffSet => m_CenterOfMassOffSet;
-		public float Drag => m_Drag;
-		public float AngularDrag => m_AngularDrag;
+		public Vector3 CenterOfMassOffSet => new Vector3(0, m_CenterOfMassYPosition, m_CenterOfMassZPosition);
 		public float WheelRadius => m_WheelRadius;
 		public Vector3 WheelCenter => m_WheelCenter;
 
