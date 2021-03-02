@@ -46,9 +46,20 @@ namespace Conibear {
 
 		public void InitializeWheelCollider(Rigidbody rigidbody, RealisticVehiclePrefab realisticVehicle) {
 			var jointSpring = new JointSpring();
-			jointSpring.spring = realisticVehicle.Spring;
-			jointSpring.damper = realisticVehicle.Damper;
-			jointSpring.targetPosition = realisticVehicle.TargetPosition;
+
+			var centerMassSpringDifference = realisticVehicle.Spring * (rigidbody.centerOfMass.z + 1) - realisticVehicle.Spring;
+
+			// Adding more spring to the heavy part of the vehicle
+			if (m_AxelType == AxelType.Front && rigidbody.centerOfMass.z > 0) {
+				jointSpring.spring = realisticVehicle.Spring + centerMassSpringDifference;
+			} else if (m_AxelType == AxelType.Rear && rigidbody.centerOfMass.z < 0) {
+				jointSpring.spring = realisticVehicle.Spring - centerMassSpringDifference;
+			} else {
+				jointSpring.spring = realisticVehicle.Spring;
+			}
+
+			jointSpring.damper = jointSpring.spring * realisticVehicle.Damper;
+			jointSpring.targetPosition = RealisticVehiclePrefab.WheelColliderSuspensionSpringTargetPosition;
 
 			var forwardWheelFrictionCurve = new WheelFrictionCurve();
 			forwardWheelFrictionCurve.extremumSlip = 0.4f; // unity default
@@ -225,19 +236,14 @@ namespace Conibear {
 
 		[Header("Suspension Spring")]
 		[SerializeField]
-		[Range(15, 20)]
+		[Range(15, 30)]
 		[Tooltip("Spring force attempts to reach the Target Position.\nA larger value makes the suspension reach the Target Position faster.")]
-		private float m_SpringMultipleOfMass = 17.5f;
+		private float m_SpringMultipleOfMass = 23.5f;
 
 		[SerializeField]
-		[Range(0.1f, 0.2f)]
+		[Range(3, 24)]
 		[Tooltip("Dampens the suspension velocity.\nA larger value makes the Suspension Spring move slower.")]
-		private float m_DamperAsPercentageOfSpring = 0.12f;
-
-		[SerializeField]
-		[Range(0, 1)]
-		[Tooltip("The suspension’s rest distance along Suspension Distance.\n1 maps to fully extended suspension, and 0 maps to fully compressed suspension.\nDefault value is 0.5, which matches the behavior of a regular car’s suspension.")]
-		private float m_TargetPosition = 0.5f;
+		private int m_DamperAsPercentageOfSpring = 12;
 
 		[Header(("Forward Friction"))]
 		[SerializeField]
@@ -311,8 +317,7 @@ namespace Conibear {
 		public float ForceAppPointDistance => m_ForceAppPointDistance;
 
 		public float Spring => this.Mass * m_SpringMultipleOfMass;
-		public float Damper => this.Spring * m_DamperAsPercentageOfSpring;
-		public float TargetPosition => m_TargetPosition;
+		public float Damper => m_DamperAsPercentageOfSpring * 0.01f;
 		public float ForwardStiffness => m_ForwardStiffness;
 		public float FrontWheelsSidwaysStiffness => m_FrontWheelsSidewaysStiffness;
 		public float RearWheelsSidewaysStiffness => m_RearWheelsSidewaysStiffness;
