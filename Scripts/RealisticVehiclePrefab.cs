@@ -171,8 +171,9 @@ namespace Conibear {
 		private float m_MaxSteerAngle = 30;
 
 		[SerializeField]
+		[Range(6,24)]
 		[Tooltip("The tightest circle it can make with the steering wheel turned full to one side.")]
-		private float m_TurnRadius = 10f;
+		private float m_TurnRadius = 9fs;
 
 		[Header("Rigidbody Settings")]
 		[SerializeField]

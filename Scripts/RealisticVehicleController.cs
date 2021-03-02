@@ -117,11 +117,11 @@
 			float rightSteeringAngle = 0;
 
 			if (input > 0) {
-				leftSteeringAngle = Mathf.Rad2Deg * Mathf.Atan((wheelBase / (turnRadius + (rearTrack / 2)))) * input;
-				rightSteeringAngle = Mathf.Rad2Deg * Mathf.Atan((wheelBase / (turnRadius - (rearTrack / 2)))) * input;
-			} else if (input < 0) {
 				leftSteeringAngle = Mathf.Rad2Deg * Mathf.Atan((wheelBase / (turnRadius - (rearTrack / 2)))) * input;
 				rightSteeringAngle = Mathf.Rad2Deg * Mathf.Atan((wheelBase / (turnRadius + (rearTrack / 2)))) * input;
+			} else if (input < 0) {
+				leftSteeringAngle = Mathf.Rad2Deg * Mathf.Atan((wheelBase / (turnRadius + (rearTrack / 2)))) * input;
+				rightSteeringAngle = Mathf.Rad2Deg * Mathf.Atan((wheelBase / (turnRadius - (rearTrack / 2)))) * input;
 			}
 
 			m_Vehicle.FrontLeftWheel.ApplySteerAngle(leftSteeringAngle);
