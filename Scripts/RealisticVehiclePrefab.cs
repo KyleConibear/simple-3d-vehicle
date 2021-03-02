@@ -173,7 +173,7 @@ namespace Conibear {
 		[SerializeField]
 		[Range(6,24)]
 		[Tooltip("The tightest circle it can make with the steering wheel turned full to one side.")]
-		private float m_TurnRadius = 9fs;
+		private float m_TurnRadius = 9f;
 
 		[Header("Rigidbody Settings")]
 		[SerializeField]
