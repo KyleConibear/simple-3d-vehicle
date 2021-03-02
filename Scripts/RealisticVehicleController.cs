@@ -63,6 +63,7 @@
 
 		private void Start() {
 			this.InitializeRigidbody();
+			this.InitializeVehicle();
 		}
 
 		private void FixedUpdate() {
@@ -101,6 +102,9 @@
 			this.Rigidbody.angularDrag = m_Vehicle.AngularDrag;
 		}
 
+		private void InitializeVehicle() {
+			m_Vehicle.InitializeWheels(m_Rigidbody);
+		}
 		private void Steer(float input) {
 			// Ackermann steering formula
 			// Inner wheel turns slightly more than outer for improved control

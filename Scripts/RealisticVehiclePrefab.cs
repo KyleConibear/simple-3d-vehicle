@@ -44,7 +44,7 @@ namespace Conibear {
 			}
 		}
 
-		public void InitializeWheelCollider(RealisticVehiclePrefab realisticVehicle) {
+		public void InitializeWheelCollider(Rigidbody rigidbody, RealisticVehiclePrefab realisticVehicle) {
 			var jointSpring = new JointSpring();
 			jointSpring.spring = realisticVehicle.Spring;
 			jointSpring.damper = realisticVehicle.Damper;
@@ -72,8 +72,14 @@ namespace Conibear {
 					break;
 			}
 
+			/* forceAppPointDistance parameter simulates the effective roll center of the suspension geometry.
+			  For a standard family car the value of forceAppPointDistance should be tuned to place the application point approximately 0.3m below the rigid body center of mass.
+			  Moving the application point downwards introduces more roll when cornering, while moving it upwards results in less roll when cornering.
+			  The force application point is typically below the rigid body center of mass. */
+			this.WheelCollider.forceAppPointDistance = rigidbody.centerOfMass.y - realisticVehicle.ForceAppPointDistance;
 
 			this.WheelCollider.radius = realisticVehicle.WheelRadius;
+			this.WheelCollider.suspensionDistance = realisticVehicle.SuspensionDistance;
 			this.WheelCollider.center = realisticVehicle.WheelCenter;
 			this.WheelCollider.suspensionSpring = jointSpring;
 			this.WheelCollider.forwardFriction = forwardWheelFrictionCurve;
@@ -200,6 +206,17 @@ namespace Conibear {
 		[Tooltip("The size (height) of the spring.")]
 		private float m_SuspensionDistance = 0.3f;
 
+		[SerializeField]
+		[Range(0.1f, 0.5f)]
+		[Tooltip("Application point of the suspension and tire forces measured from the base of the resting wheel.\n\n" +
+		         "This is specified as a distance along the local up vector of the vehicle's rigidbody from the base of the wheel\n" +
+		         "at its rest coordinate (the rest coordinate of the wheel is determined by the value WheelCollider.spring.targetPosition).\n" +
+		         "This parameter simulates the effective roll center of the suspension geometry.\n" +
+		         "For a standard family car the value of forceAppPointDistance should be tuned to place the application point approximately 0.3m below the rigidbody center of mass.\n" +
+		         "Moving the application point downwards introduces more roll when cornering, while moving it upwards results in less roll when cornering.\n" +
+		         "The force application point is typically below the rigid body center of mass.")]
+		private float m_ForceAppPointDistance;
+
 		[Header("Suspension Spring")]
 		[SerializeField]
 		[Range(15, 20)]
@@ -284,6 +301,11 @@ namespace Conibear {
 		public float AngularDrag => m_AngularDrag;
 		public float WheelRadius => m_WheelRadius;
 		public Vector3 WheelCenter => m_WheelCenter;
+
+		public float SuspensionDistance => m_SuspensionDistance;
+
+		public float ForceAppPointDistance => m_ForceAppPointDistance;
+
 		public float Spring => this.Mass * m_SpringMultipleOfMass;
 		public float Damper => this.Spring * m_DamperAsPercentageOfSpring;
 		public float TargetPosition => m_TargetPosition;
@@ -298,7 +320,6 @@ namespace Conibear {
 
 		private void OnEnable() {
 			this.InitializeFields();
-			this.InitializeWheels();
 		}
 
 		#endregion
@@ -312,11 +333,11 @@ namespace Conibear {
 			var rearTrack = this.RearTrack;
 		}
 
-		private void InitializeWheels() {
-			this.FrontLeftWheel.InitializeWheelCollider(this);
-			this.FrontRightWheel.InitializeWheelCollider(this);
-			this.RearLeftWheel.InitializeWheelCollider(this);
-			this.RearRightWheel.InitializeWheelCollider(this);
+		public void InitializeWheels(Rigidbody rigidbody) {
+			this.FrontLeftWheel.InitializeWheelCollider(rigidbody, this);
+			this.FrontRightWheel.InitializeWheelCollider(rigidbody, this);
+			this.RearLeftWheel.InitializeWheelCollider(rigidbody, this);
+			this.RearRightWheel.InitializeWheelCollider(rigidbody, this);
 		}
 
 		#endregion
