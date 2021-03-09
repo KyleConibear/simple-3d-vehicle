@@ -48,6 +48,16 @@
 		[SerializeField]
 		private float m_RevRangeBoundary = 1f;
 
+		[SerializeField]
+		private float m_MaxTurnAngle = 30f;
+
+		#endregion
+
+
+		#region Internal Properties
+
+		protected float MaxTurnAngle => m_MaxTurnAngle;
+
 		#endregion
 
 
