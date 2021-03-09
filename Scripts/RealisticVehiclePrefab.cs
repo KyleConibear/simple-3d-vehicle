@@ -89,6 +89,7 @@ namespace Conibear {
 			  The force application point is typically below the rigid body center of mass. */
 			this.WheelCollider.forceAppPointDistance = rigidbody.centerOfMass.y - realisticVehicle.ForceAppPointDistance;
 
+			this.WheelCollider.mass = realisticVehicle.WheelMass;
 			this.WheelCollider.radius = realisticVehicle.WheelRadius;
 			this.WheelCollider.suspensionDistance = realisticVehicle.SuspensionDistance;
 			this.WheelCollider.center = realisticVehicle.WheelCenter;
@@ -173,7 +174,7 @@ namespace Conibear {
 		private WheelDriveType m_WheelDriveType = WheelDriveType.RearWheelDrive;
 
 		[SerializeField]
-		[Tooltip("Is relative to Mass")]
+		[Tooltip("Is relative to RigidbodyMass")]
 		//[Range(1, 10)]
 		private float m_MotorForce = 500;
 
@@ -199,7 +200,7 @@ namespace Conibear {
 		[SerializeField]
 		[Tooltip("Average sedan = 2000")]
 		[Range(1000, 10000)]
-		private int m_Mass = 2000;
+		private int m_RigidbodyMass = 2000;
 
 		[SerializeField]
 		[Range(-1, 1)]
@@ -211,6 +212,10 @@ namespace Conibear {
 
 		[Header("Wheel Collider Settings")]
 		[Header("Wheels")]
+		[SerializeField]
+		[Range(10, 100)]
+		private int m_WheelMass = 20;
+
 		[SerializeField]
 		[Range(0.1f, 1)]
 		private float m_WheelRadius = 0.5f;
@@ -271,10 +276,12 @@ namespace Conibear {
 		public Wheel RearLeftWheel => m_RearLeftWheel;
 		public Wheel RearRightWheel => m_RearRightWheel;
 		public WheelDriveType WheelDriveType => m_WheelDriveType;
-		public float MotorForce => m_MotorForce * this.Mass;
+		public float MotorForce => m_MotorForce * this.RigidbodyMass;
 		public int DownForce => m_DownForce;
 		public float BreakForce => m_MotorForce * m_BreakForcePercent;
 		public float MaxSteerAngle => m_MaxSteerAngle;
+
+		public float WheelMass => m_WheelMass;
 
 		public float WheelBase {
 			get {
@@ -307,7 +314,7 @@ namespace Conibear {
 		}
 
 		public float TurnRadius => m_TurnRadius;
-		public int Mass => m_Mass;
+		public int RigidbodyMass => m_RigidbodyMass;
 		public Vector3 CenterOfMassOffSet => new Vector3(0, m_CenterOfMassYPosition, m_CenterOfMassZPosition);
 		public float WheelRadius => m_WheelRadius;
 		public Vector3 WheelCenter => m_WheelCenter;
@@ -316,7 +323,7 @@ namespace Conibear {
 
 		public float ForceAppPointDistance => m_ForceAppPointDistance;
 
-		public float Spring => this.Mass * m_SpringMultipleOfMass;
+		public float Spring => this.RigidbodyMass * m_SpringMultipleOfMass;
 		public float Damper => m_DamperAsPercentageOfSpring * 0.01f;
 		public float ForwardStiffness => m_ForwardStiffness;
 		public float FrontWheelsSidwaysStiffness => m_FrontWheelsSidewaysStiffness;

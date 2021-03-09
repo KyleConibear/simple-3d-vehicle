@@ -96,7 +96,7 @@
 		}
 
 		private void InitializeRigidbody() {
-			this.Rigidbody.mass = m_Vehicle.Mass;
+			this.Rigidbody.mass = m_Vehicle.RigidbodyMass;
 			this.Rigidbody.centerOfMass += m_Vehicle.CenterOfMassOffSet;
 			this.Rigidbody.drag = RealisticVehiclePrefab.RigidbodyDrag;
 			this.Rigidbody.angularDrag = RealisticVehiclePrefab.RigidbodyAngularDrag;
@@ -105,6 +105,7 @@
 		private void InitializeVehicle() {
 			m_Vehicle.InitializeWheels(m_Rigidbody);
 		}
+
 		private void Steer(float input) {
 			// Ackermann steering formula
 			// Inner wheel turns slightly more than outer for improved control
@@ -129,10 +130,6 @@
 		}
 
 		private void Accelerate(float input) {
-			if (input == 0) {
-				return;
-			}
-
 			int numberOfWheels = m_Vehicle.WheelDriveType == WheelDriveType.AllWheelDrive ? 4 : 2;
 			float motorPower = input * (m_Vehicle.MotorForce / numberOfWheels);
 

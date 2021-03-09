@@ -99,7 +99,7 @@ WheelCollider:
     targetPosition: 0.5
   m_SuspensionDistance: 0.3
   m_ForceAppPointDistance: 0
-  m_Mass: 20
+  m_Mass: 50
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
@@ -551,9 +551,10 @@ MonoBehaviour:
   m_BreakForcePercent: 2
   m_MaxSteerAngle: 30
   m_TurnRadius: 9
-  m_Mass: 2000
+  m_RigidbodyMass: 2000
   m_CenterOfMassYPosition: -0.25
   m_CenterOfMassZPosition: 0.5
+  m_WheelMass: 50
   m_WheelRadius: 0.35
   m_WheelCenter: {x: 0, y: 0.15, z: 0}
   m_SuspensionDistance: 0.35
@@ -662,7 +663,7 @@ WheelCollider:
     targetPosition: 0.5
   m_SuspensionDistance: 0.3
   m_ForceAppPointDistance: 0
-  m_Mass: 20
+  m_Mass: 50
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
@@ -732,7 +733,7 @@ WheelCollider:
     targetPosition: 0.5
   m_SuspensionDistance: 0.3
   m_ForceAppPointDistance: 0
-  m_Mass: 20
+  m_Mass: 50
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
@@ -846,7 +847,7 @@ WheelCollider:
     targetPosition: 0.5
   m_SuspensionDistance: 0.3
   m_ForceAppPointDistance: 0
-  m_Mass: 20
+  m_Mass: 50
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4

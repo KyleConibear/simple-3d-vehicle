@@ -4,25 +4,22 @@ using System.Collections.Generic;
 using Conibear;
 using UnityEngine;
 
-public class ArcadeVehicle : MonoBehaviour {
+public class ArcadeVehicle : Vehicle {
 	[SerializeField]
-	private float m_ForwardForce, m_ReverseForce = 20f;
+	private uint m_ForwardForce = 200;
+
+	[SerializeField]
+	private uint m_ReverseForce = 150;
 
 	[SerializeField]
 	private float m_TurnSpeed = 15f;
-
-	[SerializeField]
-	private Rigidbody m_SphereRigidbody;
-
-	[SerializeField]
-	private Transform m_CarModel;
 
 	[SerializeField]
 	private SphereColliderGroundChecker m_SphereGroundCheck;
 
 	private float m_MoveInput;
 	private float m_TurnInput;
-	
+
 	private bool m_IsCarGrounded;
 
 	private void Awake() {
@@ -31,7 +28,7 @@ public class ArcadeVehicle : MonoBehaviour {
 
 	// Start is called before the first frame update
 	void Start() {
-		m_SphereRigidbody.transform.parent = null;
+		base.Rigidbody.transform.parent = null;
 	}
 
 	// Update is called once per frame
@@ -48,23 +45,22 @@ public class ArcadeVehicle : MonoBehaviour {
 		transform.rotation = Quaternion.Slerp(transform.rotation, targetQuaternion, 0.1f);
 
 		if (m_IsCarGrounded) {
-			m_SphereRigidbody.drag = 4;
+			base.Rigidbody.drag = 4;
 		} else {
-			m_SphereRigidbody.drag = 0.1f;
+			base.Rigidbody.drag = 0.1f;
 		}
 	}
-	
 
-	void FixedUpdate() {
 
-		transform.position = Vector3.MoveTowards(transform.position, m_SphereRigidbody.position, 1);
-		
+	protected override void FixedUpdate() {
+		transform.position = Vector3.MoveTowards(transform.position, base.Rigidbody.position, 1);
+
 		if (m_IsCarGrounded)
-			m_SphereRigidbody.AddForce(transform.forward * m_MoveInput, ForceMode.Acceleration);
+			base.Rigidbody.AddForce(transform.forward * m_MoveInput, ForceMode.Acceleration);
 		else {
-			m_SphereRigidbody.AddForce(transform.up * -9.8f * m_SphereRigidbody.mass);
+			base.Rigidbody.AddForce(transform.up * -9.8f * base.Rigidbody.mass);
 		}
-		
-		Debug.Log(m_SphereRigidbody.velocity.magnitude * 3.6);
+
+		base.FixedUpdate();
 	}
 }
