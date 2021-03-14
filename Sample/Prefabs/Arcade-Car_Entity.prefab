@@ -42,7 +42,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: f61a33e7ba9a78a4db284cbcc9c139c0, type: 3}
-  m_PlayOnAwake: 0
+  m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
   Loop: 1
@@ -169,7 +169,7 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: f97507d425be19341a133b182a42d70e, type: 3}
-  m_PlayOnAwake: 0
+  m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
   Loop: 1
@@ -627,6 +627,39 @@ MonoBehaviour:
   m_Topspeed: 250
   m_RevRangeBoundary: 1
   m_MaxTurnAngle: 30
+  m_Gears:
+  - m_Force: 100
+    m_MinSpeed: 0
+    m_MaxSpeed: 50
+    m_Duration: 3
+    m_PowerCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 0
+  m_EngineSound: {fileID: 6330029045778230372}
+  m_SkidSound: {fileID: 914585750525179549}
+  m_PlaySkidAudioThreshold: 0.5
+  m_SkidFadeSpeed: 2
   m_FLWheel: {fileID: 5071439050826174941}
   m_FRWheel: {fileID: 5071439050964442826}
   m_RLWheel: {fileID: 5071439049832687220}
@@ -634,10 +667,6 @@ MonoBehaviour:
   m_ForwardForce: 100
   m_ReverseForce: 50
   m_TurnSpeed: 75
-  m_EngineSound: {fileID: 6330029045778230372}
-  m_SkidSound: {fileID: 914585750525179549}
-  m_PlaySkidAudioThreshold: 0.5
-  m_SkidFadeSpeed: 2
   m_SphereGroundCheck: {fileID: 5071439049956235149}
 --- !u!1 &5071439050215413117
 GameObject:

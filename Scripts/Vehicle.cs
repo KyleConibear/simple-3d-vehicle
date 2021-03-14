@@ -128,11 +128,11 @@
 			float downgearlimit = (1 / (float) NoOfGears) * m_CurrentGear;
 
 			if (m_CurrentGear > 0 && f < downgearlimit) {
-				m_CurrentGear--;
+				//m_CurrentGear--;
 			}
 
 			if (f > upgearlimit && (m_CurrentGear < (NoOfGears - 1))) {
-				m_CurrentGear++;
+				//m_CurrentGear++;
 			}
 		}
 
