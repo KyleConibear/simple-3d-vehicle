@@ -3,7 +3,7 @@
 	using UnityEngine;
 
 
-	public class ArcadeVehicle : MonoBehaviour {
+	public class Vehicle : MonoBehaviour {
 		#region Internal Consts
 
 		private const float RigidbodyDrag = 5f;
