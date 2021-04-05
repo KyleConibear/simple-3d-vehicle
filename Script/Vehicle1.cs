@@ -177,16 +177,8 @@ namespace Conibear {
 				m_GearLerpValue = Mathf.Lerp(this.GearMinForce, this.GearMaxForce, this.GearPowerCurve.Evaluate(ForceInterpolationPoint));
 
 				if (m_MoveInput > 0 && ForceInterpolationPoint < this.PowerCurveTimeEnd) {
-					if (this.Gear == 0) {
-						this.ShiftUp();
-					}
-
 					m_ForceTimeElapsed += Time.deltaTime;
 				} else if (m_MoveInput < 1 && m_ForceTimeElapsed > 0) {
-					if (this.Gear == 0 || ForceInterpolationPoint < Mathf.Epsilon) {
-						this.ShiftDown();
-					}
-
 					m_ForceTimeElapsed -= Time.deltaTime;
 				}
 
@@ -205,12 +197,12 @@ namespace Conibear {
 				return lastFrame.time;
 			}
 		}
-		
+
 
 		private float ForceTimeElapsed => m_ForceTimeElapsed;
 		private float ForceInterpolationPoint => m_ForceInterpolationPoint = this.ForceTimeElapsed / this.PowerCurveTimeEnd;
 
-		private float NormalizedGearForceInterpolationPoint => m_GearLerpValue / this.GearMaxForce;
+		private float NormalizedGearForceInterpolationPoint => this.ForceInterpolationPoint / this.PowerCurveTimeEnd;
 
 		private float PlaySkidAudioThreshold = MaxTurnAngle * SkidAudioThresholdFactor;
 
@@ -234,7 +226,10 @@ namespace Conibear {
 			} else if (Input.GetKeyDown(KeyCode.E)) {
 				this.ShiftUp();
 			}
+		}
 
+		private void LateUpdate() {
+			this.Transmission();
 			this.SetFrontWheelsAngle();
 			this.PlayEngineAudio();
 			this.PlaySkidAudio();
@@ -282,7 +277,7 @@ namespace Conibear {
 			}
 
 			m_Gear--;
-			m_ForceTimeElapsed = 1; //(this.PowerCurveTimeEnd * 0.85f);
+			m_ForceTimeElapsed = this.PowerCurveTimeEnd * 0.85f;
 		}
 
 		private void ShiftUp() {
@@ -291,7 +286,19 @@ namespace Conibear {
 			}
 
 			m_Gear++;
-			m_ForceTimeElapsed = 0;//(this.PowerCurveTimeEnd * 0.15f);
+			m_ForceTimeElapsed = this.PowerCurveTimeEnd * 0.15f;
+		}
+
+		private void Transmission() {
+			if (this.m_MoveInput > 0) {
+				if (this.Gear <= 0 || NormalizedGearForceInterpolationPoint >= 1) {
+					this.ShiftUp();
+				}
+			} else if ((this.m_MoveInput < 0 && this.Gear == 0) || NormalizedGearForceInterpolationPoint <= Mathf.Epsilon) {
+				this.ShiftDown();
+			} else if (this.m_MoveInput == 0 && this.Gear == 1 && NormalizedGearForceInterpolationPoint <= Mathf.Epsilon) {
+				//this.ShiftDown();
+			}
 		}
 
 		private void AddDownwardForce() {
@@ -309,7 +316,7 @@ namespace Conibear {
 				return;
 			}
 
-			newRotation = m_TurnInput * (m_TurnSpeed / this.Gear) * Time.deltaTime;
+			newRotation = (m_TurnInput - (m_TurnInput / (this.NumberOfGears + 2 - this.Gear))) * m_TurnSpeed * Time.deltaTime;
 
 			transform.Rotate(0, newRotation, 0, Space.World);
 		}
@@ -323,7 +330,7 @@ namespace Conibear {
 			if (m_EngineSound != null) {
 				if (this.NormalizedGearForceInterpolationPoint > 0) {
 					m_EngineSound.volume = this.NormalizedGearForceInterpolationPoint + 0.5f;
-					m_EngineSound.pitch = this.NormalizedGearForceInterpolationPoint * 2 + 1;
+					m_EngineSound.pitch = this.NormalizedGearForceInterpolationPoint + 1;
 				}
 			}
 		}
