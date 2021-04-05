@@ -13,6 +13,7 @@
 		private const float TerminalVelocityThresholdFactor = 0.9f;
 		private const float MeterPerSecondConversionToMilesPerHour = 2.23693629f;
 		private const float GravityMultiplier = 3;
+		private const float ForceMultiplier = 10;
 
 		#endregion
 
@@ -21,10 +22,22 @@
 
 		[Header("Debug Stats")]
 		[ShowOnly] [SerializeField]
-		private int m_Power = 0;
+		private float m_Force;
 
 		[ShowOnly] [SerializeField]
-		private int m_Force;
+		private float m_MaxForce;
+
+		[ShowOnly] [SerializeField]
+		private float m_ForceInterpolationPoint = 0;
+
+		[ShowOnly] [SerializeField]
+		private float m_RigidbodyMagnitude = 0;
+
+		[ShowOnly] [SerializeField]
+		private float m_TerminalVelocity = 0;
+
+		[ShowOnly] [SerializeField]
+		private bool m_HasReachedTerminalVelocityThreshold;
 
 		[ShowOnly] [SerializeField]
 		private int m_CurrentGear = 1;
@@ -45,7 +58,8 @@
 		private AnimationCurve[] m_GearCurves;
 
 		[SerializeField]
-		private float m_Duration;
+		[Range(0.5f, 0.99f)]
+		private float m_AutoShiftThreshold = 0.9f;
 
 		[SerializeField]
 		private AudioSource m_EngineSound, m_SkidSound;
@@ -59,8 +73,6 @@
 		[SerializeField]
 		protected Transform m_FLWheel, m_FRWheel;
 
-		[SerializeField]
-		private uint m_ForwardForce = 200;
 
 		[SerializeField]
 		private SphereColliderGroundChecker m_SphereGroundCheck;
@@ -74,8 +86,6 @@
 		private float m_PreviousMoveInput;
 		private float m_TurnInput;
 
-		[SerializeField]
-		private float m_ForceLerp = 0;
 
 		private IEnumerator m_ShiftCourtine;
 
@@ -86,46 +96,55 @@
 
 		private bool IsGrounded => m_SphereGroundCheck.IsRigidbodyGrounded(m_Rigidbody);
 
+		private float m_ForceTimeElapsed = 0;
+
+		private float ForceInterpolationPoint => m_ForceInterpolationPoint = m_ForceTimeElapsed / this.GearPowerCurveDuration;
+
 		private float Force {
 			get {
-				if (m_MoveInput != 0) {
-					m_ForceLerp += Time.deltaTime / m_Duration;
-					if (m_ForceLerp > 1)
-						m_ForceLerp = 1;
-				} else {
-					m_ForceLerp -= Time.deltaTime / (m_Duration * 5); // replace magic number with const
+				var lerpValue = Mathf.Lerp(0, this.GearPowerCurveDuration, ForceInterpolationPoint);
 
-					if (m_ForceLerp < 0)
-						m_ForceLerp = 0;
-				}
+				if (ForceInterpolationPoint < this.GearPowerCurveDuration && m_MoveInput > 0) {
+					m_ForceTimeElapsed += Time.deltaTime;
+				} else if (ForceInterpolationPoint > 0 && m_MoveInput < 1) {
+					m_ForceTimeElapsed -= Time.deltaTime;
+				}    
 
-				m_Force = (int) (Power * this.GearPowerCurve.Evaluate(m_ForceLerp));
-				return m_Force;
+				return m_Force = this.GearPowerCurve.Evaluate(lerpValue) * ForceMultiplier;
 			}
 		}
+
+		private float MaxForce => m_MaxForce = this.GearPowerCurve.Evaluate(this.GearPowerCurveDuration) * ForceMultiplier;
 
 		private float CurrentSpeed => m_CurrentSpeed = m_Rigidbody.velocity.magnitude * MeterPerSecondConversionToMilesPerHour;
-		private float TerminalVelocity => Math.TerminalVelocity(m_Rigidbody, transform.forward * this.Power);
-		private bool HasReachedTerminalVelocityThreshold => this.m_Rigidbody.velocity.magnitude >= (this.TerminalVelocity * TerminalVelocityThresholdFactor);
-		private int PowerStep => (int) (m_ForwardForce / this.NumberOfGears);
 
-		private int Power {
-			get {
-				if (m_MoveInput < 0) {
-					m_Power = -PowerStep; // Driving in reverse
-				} else {
-					m_Power = PowerStep * m_CurrentGear;
-				}
+		private float RigidbodyMagnitude => m_RigidbodyMagnitude = this.m_Rigidbody.velocity.magnitude;
+		private float TerminalVelocity => m_TerminalVelocity = Math.TerminalVelocity(m_Rigidbody, transform.forward * this.MaxForce);
+		private float AutoShiftThreshold => m_AutoShiftThreshold;
+		private bool HasReachedTerminalVelocityThreshold => m_HasReachedTerminalVelocityThreshold = RigidbodyMagnitude >= TerminalVelocity * AutoShiftThreshold;
 
-				return m_Power;
-			}
-		}
+		private bool HasDroppedBelowCurrentGearVelocityThreshold => RigidbodyMagnitude < PreviousGearsTerminalVelocity * 0.6f;
+
+		private float PreviousGearsTerminalVelocity { get; set; }
 
 		private int NumberOfGears => m_GearCurves.Length;
 		private int CurrentGearIndex => m_CurrentGear - 1;
 		private AnimationCurve GearPowerCurve => m_GearCurves[this.CurrentGearIndex];
-		private bool CanShiftUp => false;//m_CurrentGear < this.NumberOfGears && this.HasReachedTerminalVelocityThreshold;
-		private bool CanShiftDown => m_CurrentGear > 1 && CurrentSpeed <= PowerStep * (this.CurrentGearIndex);
+
+		private float GearPowerCurveDuration {
+			get {
+				if (GearPowerCurve.length == 0) {
+					return 0;
+				}
+
+				var lastFrame = GearPowerCurve[GearPowerCurve.length - 1];
+
+				return lastFrame.time;
+			}
+		}
+
+		private bool CanShiftUp => m_CurrentGear < this.NumberOfGears - 1 && ForceInterpolationPoint >= 1f;
+		private bool CanShiftDown => m_CurrentGear > 1 && ForceInterpolationPoint <= Mathf.Epsilon;
 
 		#endregion
 
@@ -133,39 +152,36 @@
 		#region MonoBehaviour Methods
 
 		// Start is called before the first frame update
-		void Awake() {
+		private void Awake() {
 			this.InitializeRigidbody();
 		}
-		
+
 		// Update is called once per frame
-		void Update() {
+		private void Update() {
 			m_MoveInput = Input.GetAxisRaw("Vertical");
 			m_TurnInput = Input.GetAxisRaw("Horizontal");
 
 			this.PlayEngineAudio();
 			this.PlaySkidAudio();
 			this.SetFrontWheelsAngle();
-		}
 
-
-		protected void FixedUpdate() {
 			if (m_ShiftCourtine == null) {
 				// go to next gear
-				if (this.CanShiftUp) {
+				if (m_MoveInput > 0 && this.CanShiftUp) {
 					m_ShiftCourtine = ShiftCourtine(true);
 					StartCoroutine(m_ShiftCourtine);
-				} else if (this.CanShiftDown) {
-					//m_ShiftCourtine = ShiftCourtine(false);
-					//StartCoroutine(m_ShiftCourtine);
+				} else if (m_MoveInput < 1 && this.CanShiftDown) {
+					m_ShiftCourtine = ShiftCourtine(false);
+					StartCoroutine(m_ShiftCourtine);
 				}
 			}
+		}
 
-
+		private void FixedUpdate() {
 			this.Accelerate();
 			this.Steer();
 			this.AddDownwardForce();
 		}
-
 
 		private void OnDrawGizmos() {
 			Gizmos.DrawLine(transform.position, transform.position + (transform.forward * 5));
@@ -185,8 +201,39 @@
 			m_Rigidbody.drag = RigidbodyDrag;
 		}
 
+		private void Accelerate() {
+			if (this.IsGrounded) {
+				m_Rigidbody.AddForce(transform.forward * this.Force, ForceMode.Acceleration);
+			}
+
+			transform.position = m_Rigidbody.position;
+
+			var temp = HasReachedTerminalVelocityThreshold;
+		}
+
+		private void Steer() {
+			var newRotation = 0f;
+			if (Force == 0) {
+				return;
+			}
+
+			newRotation = m_TurnInput * this.Force * Time.deltaTime;
+
+			transform.Rotate(0, newRotation, 0, Space.World);
+		}
+
+		private void AddDownwardForce() {
+			if (this.IsGrounded) {
+				return;
+			}
+
+			var downwardForce = transform.up * (Physics.gravity.y * GravityMultiplier * RigidbodyDrag);
+			m_Rigidbody.AddForce(downwardForce, ForceMode.Acceleration);
+		}
 
 		private IEnumerator ShiftCourtine(bool shiftUp) {
+			PreviousGearsTerminalVelocity = TerminalVelocity;
+			m_ForceTimeElapsed = 0.0f;
 			if (shiftUp) {
 				m_CurrentGear++;
 			} else {
@@ -197,33 +244,9 @@
 			m_ShiftCourtine = null;
 		}
 
-
-		private void Accelerate() {
-			if (this.IsGrounded) {
-				m_Rigidbody.AddForce(transform.forward * this.Force, ForceMode.Acceleration);
-			}
-
-			transform.position = m_Rigidbody.position;
-		}
-		private void Steer() {
-			var newRotation = 0f;
-			if (Force == 0) {
-				return;
-			} else if (Force > 0) {
-				newRotation = m_TurnInput * this.PowerStep * Time.deltaTime;
-			} else if (Force < 0) {
-				newRotation = m_TurnInput * -this.PowerStep * Time.deltaTime;
-			}
-
-			transform.Rotate(0, newRotation, 0, Space.World);
-		}
-		private void AddDownwardForce() {
-			if (this.IsGrounded) {
-				return;
-			}
-
-			var downwardForce = transform.up * (Physics.gravity.y * GravityMultiplier * RigidbodyDrag);
-			m_Rigidbody.AddForce(downwardForce, ForceMode.Acceleration);
+		private void SetFrontWheelsAngle() {
+			m_FLWheel.localRotation = Quaternion.Euler(m_FLWheel.localRotation.eulerAngles.x, (m_TurnInput * MaxTurnAngle) - 180, m_FLWheel.localRotation.eulerAngles.z);
+			m_FRWheel.localRotation = Quaternion.Euler(m_FRWheel.localRotation.eulerAngles.x, (m_TurnInput * MaxTurnAngle), m_FRWheel.localRotation.eulerAngles.z);
 		}
 
 		private void PlayEngineAudio() {
@@ -240,11 +263,6 @@
 					m_SkidSound.volume = Mathf.MoveTowards(m_SkidSound.volume, 0f, m_SkidFadeSpeed * Time.deltaTime);
 				}
 			}
-		}
-
-		private void SetFrontWheelsAngle() {
-			m_FLWheel.localRotation = Quaternion.Euler(m_FLWheel.localRotation.eulerAngles.x, (m_TurnInput * MaxTurnAngle) - 180, m_FLWheel.localRotation.eulerAngles.z);
-			m_FRWheel.localRotation = Quaternion.Euler(m_FRWheel.localRotation.eulerAngles.x, (m_TurnInput * MaxTurnAngle), m_FRWheel.localRotation.eulerAngles.z);
 		}
 
 		#endregion
