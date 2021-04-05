@@ -5,7 +5,7 @@ namespace Conibear {
 	using UnityEngine;
 
 
-	public class Vehicle1 : MonoBehaviour {
+	public class VehicleController : MonoBehaviour {
 		#region Internal Consts
 
 		private const float RigidbodyDrag = 5f;
@@ -24,7 +24,7 @@ namespace Conibear {
 
 		[Header("Debug Stats")]
 		[ShowOnly] [SerializeField]
-		private int m_Gear = 0;
+		private int m_Gear = 1;
 
 		[ShowOnly] [SerializeField]
 		private int m_GearMinForce;
@@ -33,7 +33,10 @@ namespace Conibear {
 		private int m_GearMaxForce;
 
 		[ShowOnly] [SerializeField]
-		private float m_ForceInterpolationPoint = 0;
+		private float m_GearCurveInterpolationPoint = 0;
+
+		[ShowOnly] [SerializeField]
+		private float m_NormalizedGearCurveInterpolationPoint;
 
 		[ShowOnly] [SerializeField]
 		private float m_GearLerpValue;
@@ -45,6 +48,10 @@ namespace Conibear {
 
 
 		#region SerializeFields
+
+		[Header("ScriptableObjects")]
+		[SerializeField]
+		private VehicleData m_VehicleData;
 
 		[Header("Component References")]
 		[SerializeField]
@@ -61,26 +68,10 @@ namespace Conibear {
 
 		[Header("Audio")]
 		[SerializeField]
-		private AudioSource m_EngineSound;
+		private AudioSource m_EngineAudioSource;
 
 		[SerializeField]
-		private AudioSource m_SkidSound;
-
-		[SerializeField]
-		private float m_SkidFadeSpeed = 2f;
-
-		[Header("Stats")]
-		[SerializeField]
-		private int m_NumberOfGears = 5;
-
-		[SerializeField]
-		private int m_MaxForce = 200;
-
-		[SerializeField]
-		private AnimationCurve m_GearCurve;
-
-		[SerializeField]
-		private int m_TurnSpeed = 50;
+		private AudioSource m_SkidAudioSource;
 
 		#endregion
 
@@ -150,15 +141,14 @@ namespace Conibear {
 		#endregion
 
 
+		private VehicleData VehicleData => m_VehicleData;
 		private bool IsGrounded => this.VehicleSphere.IsGrounded;
 
 		private int Gear => m_Gear;
 
-		public int NumberOfGears => m_NumberOfGears;
+		private AnimationCurve GearPowerCurve => VehicleData.GearCurves[this.Gear - 1];
 
-		private AnimationCurve GearPowerCurve => m_GearCurve;
-
-		private int GearForceSteps => m_GearForceSteps != 0 ? m_GearForceSteps : m_MaxForce / this.NumberOfGears;
+		private int GearForceSteps => m_GearForceSteps != 0 ? m_GearForceSteps : VehicleData.MaxForce / this.VehicleData.NumberOfGears;
 
 		private int GearMinForce {
 			get {
@@ -174,10 +164,10 @@ namespace Conibear {
 
 		private int Force {
 			get {
-				m_GearLerpValue = Mathf.Lerp(this.GearMinForce, this.GearMaxForce, this.GearPowerCurve.Evaluate(ForceInterpolationPoint));
+				m_GearLerpValue = Mathf.Lerp(this.GearMinForce, this.GearMaxForce, this.GearPowerCurve.Evaluate(GearCurveInterpolationPoint));
 
-				if (m_MoveInput > 0 && ForceInterpolationPoint < this.PowerCurveTimeEnd) {
-					m_ForceTimeElapsed += Time.deltaTime / this.Gear;
+				if (m_MoveInput > 0 && GearCurveInterpolationPoint < this.PowerCurveTimeEnd) {
+					m_ForceTimeElapsed += Time.deltaTime;
 				} else if (m_MoveInput < 1 && m_ForceTimeElapsed > 0) {
 					m_ForceTimeElapsed -= Time.deltaTime;
 				}
@@ -198,11 +188,10 @@ namespace Conibear {
 			}
 		}
 
-
 		private float ForceTimeElapsed => m_ForceTimeElapsed;
-		private float ForceInterpolationPoint => m_ForceInterpolationPoint = this.ForceTimeElapsed / this.PowerCurveTimeEnd;
+		private float GearCurveInterpolationPoint => m_GearCurveInterpolationPoint = this.ForceTimeElapsed / this.PowerCurveTimeEnd;
 
-		private float NormalizedGearForceInterpolationPoint => this.ForceInterpolationPoint / this.PowerCurveTimeEnd;
+		private float NormalizedGearCurveInterpolationPoint => m_NormalizedGearCurveInterpolationPoint = this.GearCurveInterpolationPoint / this.PowerCurveTimeEnd;
 
 		private float PlaySkidAudioThreshold = MaxTurnAngle * SkidAudioThresholdFactor;
 
@@ -213,6 +202,7 @@ namespace Conibear {
 
 		// Start is called before the first frame update
 		private void Start() {
+			this.InitializeAudio();
 			this.SetModelPosition();
 			this.FlipFrontLeftWheel();
 		}
@@ -225,6 +215,10 @@ namespace Conibear {
 				this.ShiftDown();
 			} else if (Input.GetKeyDown(KeyCode.E)) {
 				this.ShiftUp();
+			}
+
+			if (Input.GetKeyDown(KeyCode.Space)) {
+				this.Break();
 			}
 		}
 
@@ -254,6 +248,10 @@ namespace Conibear {
 
 		#region Internal Methods
 
+		private void InitializeAudio() {
+			m_EngineAudioSource.clip = this.VehicleData.EngineAudioClip;
+			m_SkidAudioSource.clip = this.VehicleData.SkidAudioClip;
+		}
 		private void SetModelPosition() {
 			VehicleModel.localPosition = new Vector3(0, -this.VehicleSphere.SphereColliderGroundChecker.SphereRadius, 0);
 		}
@@ -265,38 +263,40 @@ namespace Conibear {
 
 		private void Accelerate() {
 			if (this.IsGrounded) {
+				if (this.Force < 0 && this.m_MoveInput > 0)
+					return;
 				this.Rigidbody.AddForce(transform.forward * this.Force, ForceMode.Acceleration);
 			}
 
 			transform.position = this.Rigidbody.position;
 		}
 
-		private void ShiftDown() {
-			if (m_Gear < 0) {
-				return;
-			}
+		private void Break() {
+			m_ForceTimeElapsed -= Time.deltaTime * this.Gear;
+		}
 
-			m_Gear--;
-			m_ForceTimeElapsed = this.PowerCurveTimeEnd * 0.85f;
+		private void ShiftDown() {
+			if (m_Gear > 1) {
+				m_Gear--;
+				m_ForceTimeElapsed = this.PowerCurveTimeEnd * 0.85f;
+			}
 		}
 
 		private void ShiftUp() {
-			if (this.Gear >= this.NumberOfGears) {
-				return;
+			if (this.Gear < this.VehicleData.NumberOfGears) {
+				m_Gear++;
+				m_ForceTimeElapsed = this.PowerCurveTimeEnd * 0.15f;
 			}
-
-			m_Gear++;
-			m_ForceTimeElapsed = this.PowerCurveTimeEnd * 0.15f;
 		}
 
 		private void Transmission() {
 			if (this.m_MoveInput > 0) {
-				if (this.Gear <= 0 || NormalizedGearForceInterpolationPoint >= 1) {
+				if (this.Gear <= 0 || NormalizedGearCurveInterpolationPoint >= 1) {
 					this.ShiftUp();
 				}
-			} else if ((this.m_MoveInput < 0 && this.Gear == 0) || NormalizedGearForceInterpolationPoint <= Mathf.Epsilon) {
+			} else if ((this.m_MoveInput < 0 && this.Gear == 0) || NormalizedGearCurveInterpolationPoint <= Mathf.Epsilon) {
 				this.ShiftDown();
-			} else if (this.m_MoveInput == 0 && this.Gear == 1 && NormalizedGearForceInterpolationPoint <= Mathf.Epsilon) {
+			} else if (this.m_MoveInput == 0 && this.Gear == 1 && NormalizedGearCurveInterpolationPoint <= Mathf.Epsilon) {
 				//this.ShiftDown();
 			}
 		}
@@ -316,7 +316,7 @@ namespace Conibear {
 				return;
 			}
 
-			newRotation = (m_TurnInput - (m_TurnInput / (this.NumberOfGears + 2 - this.Gear))) * m_TurnSpeed * Time.deltaTime;
+			newRotation = (m_TurnInput - (m_TurnInput / (this.VehicleData.NumberOfGears + 2 - this.Gear))) * this.VehicleData.TurnSpeed * Time.deltaTime;
 
 			transform.Rotate(0, newRotation, 0, Space.World);
 		}
@@ -327,20 +327,20 @@ namespace Conibear {
 		}
 
 		private void PlayEngineAudio() {
-			if (m_EngineSound != null) {
-				if (this.NormalizedGearForceInterpolationPoint > 0) {
-					m_EngineSound.volume = this.NormalizedGearForceInterpolationPoint + 0.5f;
-					m_EngineSound.pitch = this.NormalizedGearForceInterpolationPoint + 1;
+			if (this.VehicleData.EngineAudioClip != null) {
+				if (this.NormalizedGearCurveInterpolationPoint > 0) {
+					m_EngineAudioSource.volume = this.NormalizedGearCurveInterpolationPoint + 0.5f;
+					m_EngineAudioSource.pitch = this.NormalizedGearCurveInterpolationPoint + 1;
 				}
 			}
 		}
 
 		private void PlaySkidAudio() {
-			if (m_SkidSound != null) {
-				if (Mathf.Abs(m_TurnInput * MaxTurnAngle) > PlaySkidAudioThreshold) {
-					m_SkidSound.volume = Mathf.MoveTowards(m_SkidSound.volume, 1f, m_SkidFadeSpeed * Time.deltaTime);
+			if (m_SkidAudioSource != null) {
+				if (Mathf.Abs(m_TurnInput * MaxTurnAngle) > PlaySkidAudioThreshold && this.NormalizedGearCurveInterpolationPoint > 0.7f) {
+					m_SkidAudioSource.volume = Mathf.MoveTowards(m_SkidAudioSource.volume, 1f, this.VehicleData.SkidFadeSpeed * Time.deltaTime);
 				} else {
-					m_SkidSound.volume = Mathf.MoveTowards(m_SkidSound.volume, 0f, m_SkidFadeSpeed * Time.deltaTime);
+					m_SkidAudioSource.volume = Mathf.MoveTowards(m_SkidAudioSource.volume, 0f, this.VehicleData.SkidFadeSpeed * Time.deltaTime);
 				}
 			}
 		}
