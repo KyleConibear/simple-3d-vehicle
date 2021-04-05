@@ -177,7 +177,7 @@ namespace Conibear {
 				m_GearLerpValue = Mathf.Lerp(this.GearMinForce, this.GearMaxForce, this.GearPowerCurve.Evaluate(ForceInterpolationPoint));
 
 				if (m_MoveInput > 0 && ForceInterpolationPoint < this.PowerCurveTimeEnd) {
-					m_ForceTimeElapsed += Time.deltaTime;
+					m_ForceTimeElapsed += Time.deltaTime / this.Gear;
 				} else if (m_MoveInput < 1 && m_ForceTimeElapsed > 0) {
 					m_ForceTimeElapsed -= Time.deltaTime;
 				}
